@@ -5,5 +5,14 @@
     <input type="text" name="q" placeholder="Search Rooms..." />
 </form>
 
+{% if request.user.is_authenticated %}
+<a href="{% url 'logout' %}">Logout</a>
+
+{% else %}
+
 <a href="{% url 'login' %}">Login</a>
+<!-- this block of code checks if a user is authenticated. If user_authenticated is true,
+The logout button would be at the top. If False, login button will be at the top-->
+
+{% endif %}
 <hr>

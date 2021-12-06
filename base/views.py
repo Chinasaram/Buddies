@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.http import HttpResponse
@@ -11,8 +12,7 @@ from .models import Room, Topic
 
 def loginPage(request):
     """
-    This method checks if the user is trying to login then retrieves then assigns the value inputted to the
-    username and password variable created in this function.
+    This method checks if the user is trying to login
     The code goes ahead to check if the user with the username already exists in the database via the User model
     """
     if request.method == "POST":
@@ -31,9 +31,22 @@ def loginPage(request):
             messages.error(request, "User does not exist")
 
         user = authenticate(request, username=username, password=password)
+        # this checks if the credentials inputed by the user matches the credentials on the database.
+        # A user object that matches the credentials will be outputted
+
+        if user is not None:  # if a user object is returned
+            login(request, user)  # this creates a session in the browser with the user details
+            return redirect("home")  # takes the logged in user to the home page
+        else:
+            messages.error(request, "Username or password is incorrect")
 
     context = {}
     return render(request, "base/login_register.html", context)
+
+
+def logoutView(request):
+    logout(request)
+    return redirect("home")
 
 
 def home(request):
@@ -61,6 +74,7 @@ def room(request, pk):
     return render(request, "base/room.html", context)
 
 
+@login_required(login_url="login")
 def createRoom(request):
     form = RoomForm()
     if request.method == "POST":
@@ -73,6 +87,7 @@ def createRoom(request):
     return render(request, "base/room_form.html", context)
 
 
+@login_required(login_url="login")
 def updateRoom(request, pk):  # pk is the primary key used in referencing the data.
     room = Room.objects.get(
         id=pk
@@ -92,6 +107,7 @@ def updateRoom(request, pk):  # pk is the primary key used in referencing the da
     return render(request, "base/room_form.html", context)
 
 
+@login_required(login_url="login")
 def deleteRoom(request, pk):
     room = Room.objects.get(id=pk)  # fetches the room with the unique id
     if request.method == "POST":
