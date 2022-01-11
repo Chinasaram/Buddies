@@ -1,13 +1,12 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 
 from .forms import RoomForm
-from .models import Room, Topic
+from .models import Room, Topic, User
 
 
 def loginPage(request):
@@ -28,8 +27,7 @@ def loginPage(request):
             user = User.objects.get(username=username)
 
         except:
-            messages.error(request, "User does not exist")
-
+            pass
         user = authenticate(request, username=username, password=password)
         # this checks if the credentials inputed by the user matches the credentials on the database.
         # A user object that matches the credentials will be outputted
