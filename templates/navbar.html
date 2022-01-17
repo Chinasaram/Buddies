@@ -6,6 +6,8 @@
 </form>
 
 {% if request.user.is_authenticated %}
+
+<p>Hello {{request.user|title}}</p> <!-- the title capitalizes the text-->
 <a href="{% url 'logout' %}">Logout</a>
 
 {% else %}

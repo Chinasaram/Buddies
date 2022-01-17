@@ -136,3 +136,8 @@ MEDIA_ROOT = BASE_DIR / ""  # tells django where to save user uploaded files lik
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "base.User"
+
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "base.backends.UserBackend",
+]

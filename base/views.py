@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
@@ -14,8 +15,12 @@ def loginPage(request):
     This method checks if the user is trying to login
     The code goes ahead to check if the user with the username already exists in the database via the User model
     """
+    page = "login"
+    if request.user.is_authenticated:
+        return redirect("home")  # if the user is already logged in, redirect to the home page
+
     if request.method == "POST":
-        username = request.POST.get("username")
+        username = request.POST.get("username").lower()
         password = request.POST.get("password")
 
         """
@@ -36,21 +41,38 @@ def loginPage(request):
             login(request, user)  # this creates a session in the browser with the user details
             return redirect("home")  # takes the logged in user to the home page
         else:
-            messages.error(request, "Username or password is incorrect")
+            messages.error(request, "Username or password does not exist")
 
-    context = {}
+    context = {"page": page}
     return render(request, "base/login_register.html", context)
 
 
 def logoutView(request):
     logout(request)
-    return redirect("home")
+    return redirect("login")
+
+
+def registerPage(request):
+    form = UserCreationForm()
+
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)  # this is the data inputed by the user
+        if form.is_valid():
+            user = form.save(commit=False)  # this gives access to the user data for data manipulation and cleaning
+            user.username = user.username.lower()  # this ensures that the username is lowercase
+            user.save()  # this saves the user data to the database
+            login(request, user)  # this creates a session in the browser with the user details
+            return redirect("home")  # takes the logged in user to the home page
+        else:
+            messages.error(request, "An error occurred during registration")
+    return render(request, "base/login_register.html", {"form": form})
 
 
 def home(request):
     q = (
         request.GET.get("q") if request.GET.get("q") != None else ""
-    )  # this checks if the request has a value it's going to be an empty string
+    )  # q is a variable that stores the value of the input field
+    # q would be an empty string if the input field is empty which would match all available room
     rooms = Room.objects.filter(  # if topic__name is set directly as q, the home page will be empty until a particular topic is selected then a list of rooms bearing that topic will be rendered.
         Q(topic__name__icontains=q) | Q(name__icontains=q) | Q(description__icontains=q)
     )
@@ -73,6 +95,7 @@ def room(request, pk):
 
 
 @login_required(login_url="login")
+# this decorator is used to check if the user is logged in. If not, the user will be redirected to the login page
 def createRoom(request):
     form = RoomForm()
     if request.method == "POST":

@@ -17,11 +17,11 @@ class User(AbstractUser):
         unique=True,
         error_messages={"unique": "A user with this username already exists"},
     )
-    bio = models.TextField(null=True)
+    bio = models.TextField(null=True, blank=True)
     avatar = models.ImageField(null=True, default="")
 
-    USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []
+    # USERNAME_FIELD = "email"
+    # REQUIRED_FIELDS = []
 
 
 class Topic(models.Model):
