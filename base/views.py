@@ -90,7 +90,9 @@ def home(request):
 
 def room(request, pk):
     room = Room.objects.get(id=pk)
-    context = {"rooms": room}
+    room_messages = room.message_set.all()
+    # this is a django built in feature that allows us to access the messages in a room, backward foreign key
+    context = {"room": room, "room_messages": room_messages}
     return render(request, "base/room.html", context)
 
 
