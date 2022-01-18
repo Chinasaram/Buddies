@@ -6,7 +6,7 @@ from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 
-from .forms import RoomForm
+from .forms import CustomUserCreationForm, RoomForm
 from .models import Message, Room, Topic, User
 
 
@@ -53,10 +53,10 @@ def logoutView(request):
 
 
 def registerPage(request):
-    form = UserCreationForm()
+    form = CustomUserCreationForm()
 
     if request.method == "POST":
-        form = UserCreationForm(request.POST)  # this is the data inputed by the user
+        form = CustomUserCreationForm(request.POST)  # this is the data inputed by the user
         if form.is_valid():
             user = form.save(commit=False)  # this gives access to the user data for data manipulation and cleaning
             user.username = user.username.lower()  # this ensures that the username is lowercase

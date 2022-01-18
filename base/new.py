@@ -5,3 +5,14 @@
 
 
 print(True + True + 1)
+import math
+import os
+import random
+import re
+import sys
+
+n = input(int())
+if n % 2 == 1:
+    print("Weird")
+elif n % 2 == 0 and range(2, 5):
+    print("Not Weird")
