@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from django.shortcuts import redirect, render
 
 from .forms import RoomForm
-from .models import Room, Topic, User
+from .models import Message, Room, Topic, User
 
 
 def loginPage(request):
@@ -90,8 +90,12 @@ def home(request):
 
 def room(request, pk):
     room = Room.objects.get(id=pk)
-    room_messages = room.message_set.all()
+    room_messages = room.message_set.all().order_by("-created_at")
     # this is a django built in feature that allows us to access the messages in a room, backward foreign key
+
+    if request.method == "POST":
+        message = Message.objects.create(user=request.user, room=room, body=request.POST.get("body"))
+        return redirect("room", pk=pk)
     context = {"room": room, "room_messages": room_messages}
     return render(request, "base/room.html", context)
 
