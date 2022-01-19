@@ -92,11 +92,16 @@ def room(request, pk):
     room = Room.objects.get(id=pk)
     room_messages = room.message_set.all().order_by("-created_at")
     # this is a django built in feature that allows us to access the messages in a room, backward foreign key
-
+    participants = (
+        room.participants.all()
+    )  # since it's a many-to-many relationship, the .all is more appropriate for a backward foreign key
     if request.method == "POST":
         message = Message.objects.create(user=request.user, room=room, body=request.POST.get("body"))
+        room.participants.add(
+            request.user
+        )  # this is to ensure that any user that sends a message in the room is added to the participants list of the room
         return redirect("room", pk=pk)
-    context = {"room": room, "room_messages": room_messages}
+    context = {"room": room, "room_messages": room_messages, "participants": participants}
     return render(request, "base/room.html", context)
 
 
@@ -143,3 +148,16 @@ def deleteRoom(request, pk):
     return render(
         request, "base/delete.html", {"obj": room}
     )  # the 'obj' here references the obj in the delete.html file. For this function, the room is the object
+
+
+@login_required(login_url="login")
+def deleteMessage(request, pk):
+    message = Message.objects.get(id=pk)  # fetches the message with the unique id
+
+    if request.user != message.user:
+        return HttpResponse("You are not authorized to delete this message")
+
+    if request.method == "POST":
+        Message.delete()  # deletes the message
+        return redirect("home")  # takes the user back to the home page after the delete is successful
+    return render(request, "base/delete.html", {"obj": message})
