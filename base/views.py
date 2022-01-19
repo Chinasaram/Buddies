@@ -1,7 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
@@ -143,7 +142,7 @@ def updateRoom(request, pk):  # pk is the primary key used in referencing the da
 def deleteRoom(request, pk):
     room = Room.objects.get(id=pk)  # fetches the room with the unique id
     if request.method == "POST":
-        room.delete()  # deletes the room
+        room.delete()
         return redirect("home")  # takes the user back to the home page after the delete is successful
     return render(
         request, "base/delete.html", {"obj": room}
@@ -158,6 +157,6 @@ def deleteMessage(request, pk):
         return HttpResponse("You are not authorized to delete this message")
 
     if request.method == "POST":
-        Message.delete()  # deletes the message
+        Message.delete()
         return redirect("home")  # takes the user back to the home page after the delete is successful
     return render(request, "base/delete.html", {"obj": message})
