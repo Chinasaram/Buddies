@@ -6,8 +6,8 @@ from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 
-from .forms import RoomForm
-from .models import Room, Topic, User
+from .forms import CustomUserCreationForm, RoomForm
+from .models import Message, Room, Topic, User
 
 
 def loginPage(request):
@@ -53,10 +53,10 @@ def logoutView(request):
 
 
 def registerPage(request):
-    form = UserCreationForm()
+    form = CustomUserCreationForm()
 
     if request.method == "POST":
-        form = UserCreationForm(request.POST)  # this is the data inputed by the user
+        form = CustomUserCreationForm(request.POST)  # this is the data inputed by the user
         if form.is_valid():
             user = form.save(commit=False)  # this gives access to the user data for data manipulation and cleaning
             user.username = user.username.lower()  # this ensures that the username is lowercase
@@ -90,7 +90,13 @@ def home(request):
 
 def room(request, pk):
     room = Room.objects.get(id=pk)
-    context = {"rooms": room}
+    room_messages = room.message_set.all().order_by("-created_at")
+    # this is a django built in feature that allows us to access the messages in a room, backward foreign key
+
+    if request.method == "POST":
+        message = Message.objects.create(user=request.user, room=room, body=request.POST.get("body"))
+        return redirect("room", pk=pk)
+    context = {"room": room, "room_messages": room_messages}
     return render(request, "base/room.html", context)
 
 
